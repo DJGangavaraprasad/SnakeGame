@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Snake Game</title>
+<style>
+#game-board {
+	width: 400px;
+	height: 400px;
+	border: 1px solid #000;
+	margin: 0 auto;
+}
+
+#score {
+	text-align: center;
+	margin-top: 10px;
+}
+
+#controls {
+	text-align: center;
+	margin-top: 10px;
+}
+</style>
+</head>
+<body>
+	<div id="game-board"></div>
+	<div id="score">Score: 0</div>
+	<div id="controls">Controls: W/A/S/D or Arrow keys to move</div>
+
+	<script>
+        // JavaScript code for interacting with the servlet
+        const gameBoard = document.getElementById('game-board');
+        const scoreElement = document.getElementById('score');
+
+        // Function to update the game board and score based on server response
+        function updateGame(response) {
+            // Parse the JSON response received from the servlet
+            const { gameBoardHtml, score } = JSON.parse(response);
+
+            // Update the game board HTML
+            gameBoard.innerHTML = gameBoardHtml;
+
+            // Update the score
+            scoreElement.textContent = 'Score: ' + score;
+        }
+
+        // Function to send a request to the servlet
+        function sendRequest(action) {
+            const xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Call the updateGame function with the server response
+                    updateGame(xhr.responseText);
+                }
+            };
+            xhr.open('POST', 'SnakeServlets', true);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.send('action=' + action);
+        }
+
+        // Handle keypress events to send movement requests to the servlet
+        document.addEventListener('keydown', function(event) {
+            let action = '';
+            switch (event.key) {
+                case 'w':
+                case 'ArrowUp':
+                    action = 'UP';
+                    break;
+                case 's':
+                case 'ArrowDown':
+                    action = 'DOWN';
+                    break;
+                case 'a':
+                case 'ArrowLeft':
+                    action = 'LEFT';
+                    break;
+                case 'd':
+                case 'ArrowRight':
+                    action = 'RIGHT';
+                    break;
+                case 'Enter':
+                    action = 'RESTART';
+                    break;
+            }
+
+            // Send the action to the servlet
+            if (action !== '') {
+                sendRequest(action);
+            }
+        });
+
+        // Initialize the game by sending a request to the servlet
+        sendRequest('INIT');
+
+    </script>
+</body>
+</html>
